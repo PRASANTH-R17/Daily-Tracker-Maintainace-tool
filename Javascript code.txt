@@ -1,0 +1,69 @@
+// Get active sheet of active spreadsheet
+let ss = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+let sheetName = ss.getName();
+
+// Get empty column and row numbers
+let emptyCol = ss.getLastColumn() + 1; // Empty row number
+let emptyRow = ss.getLastRow() + 1;    // Empty column number
+
+// This function gets meeting time in hours
+function dateToHours(startTime, endTime) {
+  let diffInMs = Math.abs(endTime - startTime);
+  let diffInHours = diffInMs / (1000 * 60 * 60); // Convert milliseconds to seconds, seconds to minutes, and minutes to hours
+  return diffInHours;
+}
+
+// Main function handles all functions
+function main() {
+  let allCal = CalendarApp.getAllCalendars();
+  let cal = "";
+
+  // Find primary calendar or meeting handles calendar by using domain name
+  // Primary calendar ID is always our email ID
+  // If your Gmail has private domain, change "@gmail.com" to private domain
+  for (i of allCal) {
+    let mail = i.getTitle();
+    let condition = mail.slice((Math.abs("@gmail.com".length - mail.length)), mail.length);
+
+    if ("@gmail.com" == condition) {
+      cal = i;
+    }
+  }
+
+  // After finding the primary calendar, this function gets all events or meetings for that date
+  let events = cal.getEventsForDay(new Date());
+
+  let count = emptyRow - 1;  // Use to auto-fill serial number
+  for (event of events) {
+    let currentRow = ss.getLastRow() + 1;
+
+    //Logger.log(event.getTitle()+" ----- "+event.getMyStatus()+" "+event.getStartTime())
+    let status = String(event.getMyStatus()); // Get each meeting status like Yes, No, or Owner
+
+    if (status !== "YES" && status !== "OWNER") continue; // It gets only status Yes (you accepted to join that meeting) or Owner meeting (you created the meeting)
+
+    // Get meeting details like meeting name, meeting start date & end date
+    let title = event.getTitle();
+    let startTime = event.getStartTime();
+    let endTime = event.getEndTime();
+    let hrs = dateToHours(startTime, endTime);
+
+    // Fill data in a particular column in line by line
+    ss.getRange(currentRow, 1).setValue(count);
+    ss.getRange(currentRow, 2).setValue(sheetName);
+    ss.getRange(currentRow, 3).setValue(title);
+    ss.getRange(currentRow, 4).setValue(hrs);
+    ss.getRange(currentRow, 5).setValue(status);
+
+    Logger.log(count + "___" + title + " ___ " + hrs + " ___ " + status);
+
+    count = count + 1;
+  } // End of FOR loop
+} // End of main function
+
+// This function creates a custom menu named "Custom Menu" and a sub-menu named "Auto Fill"
+// We definitely create a sub-menu if we create a custom menu
+function onOpen() {
+  let ui = SpreadsheetApp.getUi();
+  ui.createMenu("Custom Menu").addItem("Auto Fill", "main").addToUi();
+}
