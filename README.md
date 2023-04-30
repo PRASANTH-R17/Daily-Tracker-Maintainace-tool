@@ -1,4 +1,7 @@
 # Daily-Tracker-Maintainace-tool
+Spreadsheet Link : https://docs.google.com/spreadsheets/d/1uAV7_kBEIzkuUfjtF7JRptILz7mD0OUpa_uzwXMRamQ/edit?usp=sharing
+
+Please make a copy of this spreadsheet for your use.
 
 Many organizations and educational institutions maintain a record of each member's activities in a spreadsheet. This tool simplifies the process and helps to track daily activities (only planned meetings and other activities filled manually) and time management.
 
